@@ -154,7 +154,7 @@ int products_query_1(){
   char query[512];
   int i;
   int len;
-  /*conexion*/
+  
   ret = odbc_connect(&env, &dbc);
   if (!SQL_SUCCEEDED(ret)) {
       return EXIT_FAILURE;
@@ -163,47 +163,47 @@ int products_query_1(){
   /* Allocate a statement handle */
   SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-    printf("Enter productcode > ");
-    fflush(stdout);
-    fgets(x, sizeof(x), stdin);
-    len = strlen(x);
-    for(i=0;i<len;i++){
+   printf("Enter productcode > ");
+   fflush(stdout);
+   fgets(x, sizeof(x), stdin);
+   len = strlen(x);
+   for(i=0;i<len;i++){
 
       if(x[i]=='\n'){
         x[i]= '\'';
         break;
       }
     }
-      sprintf(query, "SELECT p.quantityinstock FROM products p WHERE  p.productcode =  \'%s",x);
+    sprintf(query, "SELECT p.quantityinstock FROM products p WHERE  p.productcode =  \'%s",x);
 
-      SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
-
-
-
-      SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
-
-      /* Loop through the rows in the result-set */
-      if(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-          printf("y = %s\n", y);
-      }
-          SQLCloseCursor(stmt);
+    SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
 
 
 
-      printf("\n");
+    SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
 
-      /* free up statement handle */
-      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    /* Loop through the rows in the result-set */
+    if(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+        printf("y = %s\n", y);
+    }
+    SQLCloseCursor(stmt);
 
-      /* DISCONNECT */
-      ret = odbc_disconnect(env, dbc);
-      if (!SQL_SUCCEEDED(ret)) {
-          return EXIT_FAILURE;
-      }
 
-      return EXIT_SUCCESS;
 
-  }
+    printf("\n");
+
+    /* free up statement handle */
+    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+
+    /* DISCONNECT */
+    ret = odbc_disconnect(env, dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+
+}
 
 
 int products_query_2(){
@@ -227,51 +227,50 @@ int products_query_2(){
   /* Allocate a statement handle */
   SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-    printf("Enter productname > ");
-    fflush(stdout);
-    fgets(x, sizeof(x), stdin);
+  printf("Enter productname > ");
+  fflush(stdout);
+  fgets(x, sizeof(x), stdin);
 
-    len = strlen(x);
-    for(i=0;i<len;i++){
+  len = strlen(x);
+  for(i=0;i<len;i++){
 
-      if(x[i]=='\n'){
-        x[i]= '\0';
-        break;
-      }
+    if(x[i]=='\n'){
+      x[i]= '\0';
+      break;
+    }
+  }
+
+
+
+    sprintf(query, "select p.productcode, p.productname from products p where p.productname like \'%%%s%%\'",x);
+
+    /*printf("%s\n", query);*/
+    SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
+
+    SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
+    SQLBindCol(stmt, 2, SQL_C_CHAR, z, sizeof(z), NULL);
+    /* Loop through the rows in the result-set */
+    printf("y        z\n");
+    while(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+        printf("%s %s\n", y, z);
+
+    }
+        SQLCloseCursor(stmt);
+
+
+
+    printf("\n");
+
+    /* free up statement handle */
+    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+
+    /* DISCONNECT */
+    ret = odbc_disconnect(env, dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
     }
 
-
-
-      sprintf(query, "select p.productcode, p.productname from products p where p.productname like \'%%%s%%\'",x);
-
-      /*printf("%s\n", query);*/
-      SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
-
-      SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
-      SQLBindCol(stmt, 2, SQL_C_CHAR, z, sizeof(z), NULL);
-      /* Loop through the rows in the result-set */
-      printf("y        z\n");
-      while(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-          printf("%s %s\n", y, z);
-
-      }
-          SQLCloseCursor(stmt);
-
-
-
-      printf("\n");
-
-      /* free up statement handle */
-      SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-
-      /* DISCONNECT */
-      ret = odbc_disconnect(env, dbc);
-      if (!SQL_SUCCEEDED(ret)) {
-          return EXIT_FAILURE;
-      }
-
-      return EXIT_SUCCESS;
-
+    return EXIT_SUCCESS;
 }
 
 
