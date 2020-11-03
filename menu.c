@@ -66,15 +66,13 @@ int main(void) {
                 break;
 
             case 4: {
-
-                  return 0;
+                printf("Adios!!\n\n");
+                break;
                 }
 
-                printf("Adios ajajaajaj\n\n");
-
             }
-                break;
-        }     while (nChoice != 4);
+
+        } while (nChoice != 4);
 
 
     return 0;
@@ -94,13 +92,13 @@ int ShowMainMenu() {
 
     do {
         printf("Programa de datos de cierto comercio.\n");
-        printf("Elige una opción de las disponibles no se tio.\n\n");
+        printf("Elige una opción de las disponibles\n\n");
 
         printf(" (1) Products\n"
                " (2) Orders\n"
                " (3) Customers\n"
                " (4) Exit\n\n"
-               "Introduce el número de la opción que quieras > ");
+               "Enter a number that corresponds to your choice > ");
         if (!fgets(buf, 16, stdin))
             /* reading input failed, give up: */
             nSelected =0;
@@ -137,7 +135,6 @@ void ShowProductsMenu() {
                 break;
 
             case 3: {
-              nChoice = ShowMainMenu();
             }
                 break;
 
@@ -155,7 +152,8 @@ int products_query_1(){
   char x[512];
   SQLCHAR y[512];
   char query[512];
-
+  int i;
+  int len;
   /*conexion*/
   ret = odbc_connect(&env, &dbc);
   if (!SQL_SUCCEEDED(ret)) {
@@ -165,14 +163,22 @@ int products_query_1(){
   /* Allocate a statement handle */
   SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-    printf("x = ");
+    printf("Enter productcode > ");
     fflush(stdout);
     fgets(x, sizeof(x), stdin);
+    len = strlen(x);
+    for(i=0;i<len;i++){
 
-
-      sprintf(query, "SELECT p.quantityinstock FROM products p WHERE  p.productcode = %s",x);
+      if(x[i]=='\n'){
+        x[i]= '\'';
+        break;
+      }
+    }
+      sprintf(query, "SELECT p.quantityinstock FROM products p WHERE  p.productcode =  \'%s",x);
 
       SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
+
+
 
       SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
 
@@ -209,6 +215,8 @@ int products_query_2(){
   SQLCHAR y[512];
   SQLCHAR z[512];
   char query[512];
+  int i;
+  int len;
 
   /*conexion*/
   ret = odbc_connect(&env, &dbc);
@@ -219,13 +227,24 @@ int products_query_2(){
   /* Allocate a statement handle */
   SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-    printf("x = ");
+    printf("Enter productname > ");
     fflush(stdout);
     fgets(x, sizeof(x), stdin);
 
+    len = strlen(x);
+    for(i=0;i<len;i++){
 
-      sprintf(query, "select p.productcode, p.productname from products p where p.productname like %s",x);
+      if(x[i]=='\n'){
+        x[i]= '\0';
+        break;
+      }
+    }
 
+
+
+      sprintf(query, "select p.productcode, p.productname from products p where p.productname like \'%%%s%%\'",x);
+
+      /*printf("%s\n", query);*/
       SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
 
       SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
@@ -268,7 +287,7 @@ int ShowProductsSubMenu() {
               " (2) Find\n"
               " (3) Back\n\n");
 
-       printf("Introduce un numero: > ");
+       printf("Enter a number that corresponds to your choice > ");
        if (!fgets(buf, 16, stdin))
            /* reading input failed, give up: */
            nSelected =0;
