@@ -44,39 +44,34 @@ int products_query_2();
  */
 int main(void) {
 
+  int nChoice = 0;
+  do {
+      nChoice = ShowMainMenu();
+      switch (nChoice) {
+      case 1: {
+          ShowProductsMenu();
+      }
+          break;
 
-    int nChoice = 0;
+      case 2: {
 
-    do {
-        nChoice = ShowMainMenu();
-        switch (nChoice) {
-            case 1: {
-                ShowProductsMenu();
-            }
-                break;
+      }
+          break;
 
-            case 2: {
+      case 3: {
 
-            }
-                break;
+      }
+          break;
 
-            case 3: {
-
-            }
-                break;
-
-            case 4: {
+      case 4: {
                 printf("Adios!!\n\n");
-                break;
-                }
+          break;
+              }
+          }
 
-            }
-
-        } while (nChoice != 4);
-
+      } while (nChoice != 4);
 
     return 0;
-
 }
 
 
@@ -91,26 +86,25 @@ int ShowMainMenu() {
                      as 'qwerty' */
 
     do {
-        printf("Programa de datos de cierto comercio.\n");
-        printf("Elige una opción de las disponibles\n\n");
+      printf("Programa de datos de cierto comercio.\n");
+      printf("Elige una opción de las disponibles\n\n");
+      printf(" (1) Products\n"
+             " (2) Orders\n"
+             " (3) Customers\n"
+             " (4) Exit\n\n"
+             "Enter a number that corresponds to your choice > ");
+      if (!fgets(buf, 16, stdin))
+          /* reading input failed, give up: */
+          nSelected =0;
+      else
+          /* have some input, convert it to integer: */
+          nSelected = atoi(buf);
+      printf("\n");
 
-        printf(" (1) Products\n"
-               " (2) Orders\n"
-               " (3) Customers\n"
-               " (4) Exit\n\n"
-               "Enter a number that corresponds to your choice > ");
-        if (!fgets(buf, 16, stdin))
-            /* reading input failed, give up: */
-            nSelected =0;
-        else
-            /* have some input, convert it to integer: */
-            nSelected = atoi(buf);
-        printf("\n");
-
-        if ((nSelected < 1) || (nSelected > 4)) {
-            printf("Opción incorrecta.\n\n\n");
-        }
-    } while ((nSelected < 1) || (nSelected > 4));
+      if ((nSelected < 1) || (nSelected > 4)) {
+          printf("Opción incorrecta.\n\n\n");
+    }
+      } while ((nSelected < 1) || (nSelected > 4));
 
     return nSelected;
 }
@@ -119,27 +113,27 @@ void ShowProductsMenu() {
     int nChoice = 0;
     int ret= EXIT_FAILURE;
 
-        do {
-        nChoice = ShowProductsSubMenu();
-        switch (nChoice) {
+      do {
+      nChoice = ShowProductsSubMenu();
+      switch (nChoice) {
 
-            case 1: {
+       case 1: {
 
-            if(products_query_1() == ret) break;
-            }
-                break;
+          if(products_query_1() == ret) break;
+          }
+              break;
 
-           case 2: {
-            if(products_query_2() == ret) break;
-            }
-                break;
+       case 2: {
+          if(products_query_2() == ret) break;
+          }
+              break;
 
-            case 3: {
-            }
-                break;
+       case 3: {
+          }
+              break;
+      }
 
-        }
-    } while (nChoice != 3);
+      } while (nChoice != 3);
 
 }
 
@@ -154,7 +148,7 @@ int products_query_1(){
   char query[512];
   int i;
   int len;
-  
+
   ret = odbc_connect(&env, &dbc);
   if (!SQL_SUCCEEDED(ret)) {
       return EXIT_FAILURE;
@@ -207,6 +201,7 @@ int products_query_1(){
 
 
 int products_query_2(){
+
   SQLHENV env;
   SQLHDBC dbc;
   SQLHSTMT stmt;
@@ -218,7 +213,7 @@ int products_query_2(){
   int i;
   int len;
 
-  /*conexion*/
+    /*conexion*/
   ret = odbc_connect(&env, &dbc);
   if (!SQL_SUCCEEDED(ret)) {
       return EXIT_FAILURE;
@@ -233,44 +228,40 @@ int products_query_2(){
 
   len = strlen(x);
   for(i=0;i<len;i++){
-
     if(x[i]=='\n'){
       x[i]= '\0';
       break;
     }
   }
 
+  sprintf(query, "select p.productcode, p.productname from products p where p.productname like \'%%%s%%\'",x);
 
+  /*printf("%s\n", query);*/
+  SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
 
-    sprintf(query, "select p.productcode, p.productname from products p where p.productname like \'%%%s%%\'",x);
+  SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
+  SQLBindCol(stmt, 2, SQL_C_CHAR, z, sizeof(z), NULL);
+  /* Loop through the rows in the result-set */
+  printf("y        z\n");
+  while(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
 
-    /*printf("%s\n", query);*/
-    SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
+      printf("%s %s\n", y, z);
+  }
 
-    SQLBindCol(stmt, 1, SQL_C_CHAR, y, sizeof(y), NULL);
-    SQLBindCol(stmt, 2, SQL_C_CHAR, z, sizeof(z), NULL);
-    /* Loop through the rows in the result-set */
-    printf("y        z\n");
-    while(SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        printf("%s %s\n", y, z);
+  SQLCloseCursor(stmt);
 
-    }
-        SQLCloseCursor(stmt);
+  printf("\n");
 
+  /* free up statement handle */
+  SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 
+  /* DISCONNECT */
+  ret = odbc_disconnect(env, dbc);
+  if (!SQL_SUCCEEDED(ret)) {
+      return EXIT_FAILURE;
+  }
 
-    printf("\n");
-
-    /* free up statement handle */
-    SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-
-    /* DISCONNECT */
-    ret = odbc_disconnect(env, dbc);
-    if (!SQL_SUCCEEDED(ret)) {
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
 
 
@@ -282,23 +273,23 @@ int ShowProductsSubMenu() {
 
    do {
 
-       printf(" (1) Stock\n"
-              " (2) Find\n"
-              " (3) Back\n\n");
+    printf(" (1) Stock\n"
+          " (2) Find\n"
+          " (3) Back\n\n");
 
-       printf("Enter a number that corresponds to your choice > ");
-       if (!fgets(buf, 16, stdin))
-           /* reading input failed, give up: */
-           nSelected =0;
-       else
-           /* have some input, convert it to integer: */
-           nSelected = atoi(buf);
-       printf("\n");
+   printf("Enter a number that corresponds to your choice > ");
+   if (!fgets(buf, 16, stdin))
+       /* reading input failed, give up: */
+       nSelected =0;
+   else
+       /* have some input, convert it to integer: */
+       nSelected = atoi(buf);
+   printf("\n");
 
-       if ((nSelected < 1) || (nSelected > 3)) {
-           printf("Opción incorrecta, introduce un número otra vez\n\n\n");
-       }
-   } while ((nSelected < 1) || (nSelected > 3));
+   if ((nSelected < 1) || (nSelected > 3)) {
+       printf("Opción incorrecta, introduce un número otra vez\n\n\n");
+   }
+   }while ((nSelected < 1) || (nSelected > 3));
 
    return nSelected;
 }
